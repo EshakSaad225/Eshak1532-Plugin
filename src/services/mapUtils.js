@@ -7,7 +7,9 @@ import {callQueryService} from './queryService';
 let VL = null;
 let drawing = null;
 
-export const getBuffer = async (props) => {
+export const getBuffer = async (props , projection , state) => {
+
+  console.log("state.sizeBuffer  : ", state.sizeBuffer);
 
     actionsRegistry.dispatch("clearHighlight", props.reducerId);
 
@@ -29,13 +31,13 @@ export const getBuffer = async (props) => {
 
       drawing.setOnDrawFinish((feature) => {
         actionsRegistry.dispatch("removeInteraction", drawing , props.reducerId);
-        console.log("feature.getGeometry() : ",feature.getGeometry().coordinates);
+        console.log("feature.getGeometry().coordinates : ",feature.getGeometry().coordinates);
         var point = turf.point(feature.getGeometry().coordinates);
         let buffered = null;
         buffered = turf.buffer(
           point,
-          200,
-          {units : "kilometers"}
+          state.sizeBuffer,
+          {units : state.uniteBuffer}
         );
         console.log("buffered : ", buffered);
 
@@ -54,13 +56,14 @@ export const getBuffer = async (props) => {
 
             const res = await callQueryService(
               featureBuffer.getGeometry(),
-              props.projection.code
+              projection.code
             );
             VL.addFeature(featureBuffer);
             const features = res.map((item) => item);
             console.log("features : ");
             console.log(features);
             props.setFeatures(features);
+
           });
       });
     });

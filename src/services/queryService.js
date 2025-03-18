@@ -5,7 +5,7 @@ import {
     systemHideLoading,
 } from '@penta-b/ma-lib';
 
-const genQueryBody = (layer) => {
+const genQueryBody = (BufferGeo,projCode) => {
   // console.log("layerrrr : ",layer);
   // let layerID = layer.key.id;
   // console.log("layer key : ",layerID);
@@ -16,17 +16,31 @@ const genQueryBody = (layer) => {
         id:"653fcc89-b3ae-4f01-9ae3-f83bfc4a5922",
         // id: layer.key.id ,
       },
-            crs: layer.crs ,
+      filter: {
+        conditionList: [
+          {
+            spatialCondition: {
+              key: "geometry",
+              geometry: JSON.stringify(BufferGeo),
+              spatialRelation: "INTERSECT",
+            },
+          },
+        ],
+      },
+            // crs: layer.crs ,
+            crs: projCode,
         }
     ];
 };
 
-export const callQueryService = async (layer) => {
+export const callQueryService = async (BufferGeo,projCode) => {
   console.log("callQueryService");
+  console.log("BufferGeo " , BufferGeo) ;
+  console.log("projCode " , projCode) ;
 
     store.dispatch(systemShowLoading());
     return await query
-        .queryFeatures(genQueryBody(layer))
+        .queryFeatures(genQueryBody(BufferGeo,projCode))
         .then((response)=> {
           return JSON.parse(response.data[0].features).features;
         })
